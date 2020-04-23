@@ -9,12 +9,22 @@
     <div class="row">
         <div class="col-md-4">
             <video id="video" autoplay muted style="width: 100%;height: auto;"></video>
-            <canvas id="canvas2"  style="position: absolute;top: 0; left: 0;"></canvas>
+            <canvas id="canvas2" class="draw_canvas" style="position: absolute;top: 0; left: 0;"></canvas>
+        </div>
+        <div class="col-md-4">
+            <video id="video2" autoplay muted style="width: 100%;height: auto;">
+                <source src="/images/Apna Time Aayega Gully Boy Ranveer Singh & Alia Bh.mp4" type="video/mp4">
+            </video>
+
+            <canvas id="draw_can" class="draw_canvas" style="position: absolute;top: 0; left: 0;"></canvas>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-10">
-            <canvas id="canvas" hidden></canvas>
+        <div class="col-md-4">
+            <canvas id="canvas" class="video_canvas" hidden></canvas>
+        </div>
+        <div class="col-md-4">
+            <canvas id="video_canvas" class="video_canvas" hidden></canvas>
         </div>
     </div>
 </div>
@@ -26,56 +36,58 @@
 <!-- Load the coco-ssd model. -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
 <script>
-
+    var videoList = document.getElementsByTagName('video');
+    var video_canvasList = document.getElementsByClassName('video_canvas');
+    var draw_canvasList = document.getElementsByClassName('draw_canvas');
     (async () => {
         var flipHorizontal = false;
         const model = await cocoSsd.load();
         $('.progress').hide();
        
-
         const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-
-        let canvas2 = document.getElementById('canvas2');
-        let cx2 = canvas2.getContext('2d');
-
-        const status = document.getElementById('status');
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: { facingMode: 'environment' }
         });
         video.srcObject = stream
 
-        predict()
-
-        async function predict() {
-            
-            canvas.width=video.clientWidth;
-            canvas.height=video.clientHeight;
-
-            context.drawImage(video, 0, 0, video.clientWidth, video.clientHeight);
-            const predictions = await model.detect(canvas);
+        video_canvasList = Array.from(video_canvasList);
+        draw_canvasList = Array.from(draw_canvasList);
+        videoList = Array.from(videoList);
+        
+        for (i = 0; i < videoList.length; i += 1) {
+            var video_context = video_canvasList[i].getContext('2d');
+            var draw_context = draw_canvasList[i].getContext('2d');
+            predict(videoList[i],video_canvasList[i],video_context,draw_canvasList[i],draw_context); 
+        }
+       
+        async function predict(video,video_canvas,video_context,draw_canvas,draw_context) {
+            video_canvas.width=video.clientWidth;
+            video_canvas.height=video.clientHeight;
+            video_context.drawImage(video, 0, 0, video.clientWidth, video.clientHeight);
+            const predictions = await model.detect(video_canvas);
            
-            canvas2.width=video.clientWidth;
-            canvas2.height=video.clientHeight;
+            draw_canvas.width=video.clientWidth;
+            draw_canvas.height=video.clientHeight;
             
             predictions.forEach(prediction=>{
-                cx2.beginPath();
-                cx2.lineWidth = "2";
-                cx2.strokeStyle = "blue";
-                cx2.rect(prediction['bbox'][0],prediction['bbox'][1],prediction['bbox'][2],prediction['bbox'][3]);
-                cx2.stroke();
+                draw_context.beginPath();
+                draw_context.lineWidth = "2";
+                draw_context.strokeStyle = "blue";
+                draw_context.rect(prediction['bbox'][0],prediction['bbox'][1],prediction['bbox'][2],prediction['bbox'][3]);
+                draw_context.stroke();
                 
-                cx2.font = "30px Arial";
-                cx2.fillStyle = "blue";
+                draw_context.font = "30px Arial";
+                draw_context.fillStyle = "blue";
                 var desc = prediction['class'] + ' '+ parseInt(prediction['score']*100).toString()+'%';
-                cx2.fillText(desc,prediction['bbox'][0],prediction['bbox'][1]-10);
+                draw_context.fillText(desc,prediction['bbox'][0],prediction['bbox'][1]-10);
             })
 
-            requestAnimationFrame(predict)
+            requestAnimationFrame(function(){
+                predict(video,video_canvas,video_context,draw_canvas,draw_context);
+            })
         }
-
+        
     })();
 
 </script>
