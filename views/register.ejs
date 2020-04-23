@@ -1,0 +1,37 @@
+<% include partials/header %>
+
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-md-4 m-auto">
+        <div class="card">
+          <div class="card-body">
+            <h1 class="card-title">Register</h1>
+            <form >
+              <div class="form-group">
+                <label for="name">Full name</label>
+                <input type="text" class="form-control"  name="name" placeholder="Enter your name">
+              </div>
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control"  name="username" placeholder="Enter username">
+              </div>
+              <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" class="form-control"  name="email" placeholder="Enter email">
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control"  name="password" placeholder="Password">
+              </div>
+              <button type="submit" class="btn btn-block btn-primary">Register!</button>
+            </form>
+            <small>Already a have a account ? Please <a href="/login">log in</a> instead.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+
+
+<% include partials/footer %>

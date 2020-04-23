@@ -1,0 +1,82 @@
+<% include partials/header %>
+<div class="container ">
+    <h1>Video Detection</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="progress progress-bar progress-bar-striped progress-bar-animated mb-2">Loading Model</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <video id="video" autoplay muted style="width: 100%;height: auto;"></video>
+            <canvas id="canvas2"  style="position: absolute;top: 0; left: 0;"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-10">
+            <canvas id="canvas" hidden></canvas>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Load TensorFlow.js. This is required to use coco-ssd model. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.7.2/tf.min.js"> </script>
+<!-- Load the coco-ssd model. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"> </script>
+<script>
+
+    (async () => {
+        var flipHorizontal = false;
+        const model = await cocoSsd.load();
+        $('.progress').hide();
+       
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        let canvas2 = document.getElementById('canvas2');
+        let cx2 = canvas2.getContext('2d');
+
+        const status = document.getElementById('status');
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { facingMode: 'environment' }
+        });
+        video.srcObject = stream
+
+        predict()
+
+        async function predict() {
+            
+            canvas.width=video.clientWidth;
+            canvas.height=video.clientHeight;
+
+            context.drawImage(video, 0, 0, video.clientWidth, video.clientHeight);
+            const predictions = await model.detect(canvas);
+           
+            canvas2.width=video.clientWidth;
+            canvas2.height=video.clientHeight;
+            
+            predictions.forEach(prediction=>{
+                cx2.beginPath();
+                cx2.lineWidth = "2";
+                cx2.strokeStyle = "blue";
+                cx2.rect(prediction['bbox'][0],prediction['bbox'][1],prediction['bbox'][2],prediction['bbox'][3]);
+                cx2.stroke();
+                
+                cx2.font = "30px Arial";
+                cx2.fillStyle = "blue";
+                var desc = prediction['class'] + ' '+ parseInt(prediction['score']*100).toString()+'%';
+                cx2.fillText(desc,prediction['bbox'][0],prediction['bbox'][1]-10);
+            })
+
+            requestAnimationFrame(predict)
+        }
+
+    })();
+
+</script>
+<% include partials/footer %>
