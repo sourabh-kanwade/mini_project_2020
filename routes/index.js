@@ -4,7 +4,7 @@ var multer = require('multer');
 var path = require('path');
 var fs = require('fs');
 var PATH = '';
-
+const {ensureAuthenticated} = require('../config/auth');
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
     var name = req.body.name;
@@ -29,7 +29,7 @@ var upload = multer({
 });
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/',function(req, res, next) {
   res.render('index', { title: 'Node App Express' });
 });
 
@@ -37,23 +37,15 @@ router.get('/', function(req, res, next) {
 router.get('/register-face',(req,res)=>{
   res.render('register-face');
 });
-/* GET  login page */
-router.get('/login',(req,res)=>{
-  res.render('login');
-});
-//GET Register page
-router.get('/register',(req,res)=>{
-  res.render('register');
-});
-//GET Logout page
-router.get('/logout',(req,res)=>{
-  res.render('logout');
-});
 
-router.get('/video-detection',(req,res)=>{
+//Get video-detection page
+router.get('/video-detection',ensureAuthenticated,(req,res)=>{
   res.render('video-detection');
 });
-
+router.get('/face-detection',ensureAuthenticated,(req,res)=>{
+  res.render('face-detection');
+});
+// register face
 router.post('/register2',upload.single('image'),(req,res)=>{
   console.log(req.body.name);
      

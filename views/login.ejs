@@ -8,10 +8,10 @@
             <div class="card">
                 <div class="card-body">
                     <h1 class="card-title">Sign in</h1>
-                    <form>
+                    <form action="/users/login" method="POST">
                         <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" class="form-control" name="username" placeholder="Enter username">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="Enter email">
                         </div>
                         <div class="form-group">
                             <label for="password">Password</label>
@@ -19,7 +19,7 @@
                         </div>
                         <button type="submit" class="btn btn-block btn-primary">Sign in!</button>
                     </form>
-                    <small>Not a have a account ? Please <a href="/register">register</a> instead.</small>
+                    <small>Not a have a account ? Please <a href="/users/register">register</a> instead.</small>
                 </div>
 
             </div>
