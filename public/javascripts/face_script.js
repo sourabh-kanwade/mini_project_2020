@@ -7,16 +7,13 @@ Promise.all([
   async function start(){
     console.log('Loded Models');
     const video = document.getElementById('vid');
-    
-    // const canvas = document.getElementById('overlay')
-    
+        
     onPlay(video);
   }
 
   async function onPlay(videoEl) {
     let results = await faceapi.detectAllFaces(videoEl).withFaceLandmarks();
     console.log(results);
-    
 
     const canvas = $('#overlay').get(0)
     const dims = faceapi.matchDimensions(canvas, videoEl, true)

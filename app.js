@@ -7,9 +7,6 @@ var mongoose = require('mongoose');
 var session = require('express-session');
 var passport = require('passport');
 var flash = require('connect-flash');
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
 var app = express();
 
 app.use(flash());
@@ -27,6 +24,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(function(req,res,next){
+  res.locals.isAuthenticated = req.isAuthenticated();
+  next();
+});
+
 //DB Config
 var db = require('./config/keys').MongoURI;
 
@@ -38,6 +40,9 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 
 app.use(logger('dev'));
 app.use(express.json());
