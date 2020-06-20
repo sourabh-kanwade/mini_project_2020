@@ -1,11 +1,69 @@
 <% include partials/header %>
-<script defer src="/javascripts/face-api.min.js"></script>
-<script defer src="/javascripts/face_script.js"></script>
+<script src="/javascripts/face-api.min.js"></script>
+<script>
+Promise.all([
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models')
+  ]).then(start)
+
+  async function start(){
+    console.log('Loded Models');
+    const video = document.getElementById('vid');
+    onPlay(video);
+  }
+
+  async function onPlay(videoEl) {
+    const labeledFaces = await loadLabeledImages();
+    const faceMatcher = new faceapi.FaceMatcher(labeledFaces,0.6)
+    let results = await faceapi.detectAllFaces(videoEl).withFaceLandmarks().withFaceDescriptors();
+    // console.log(results);
+    const canvas = $('#overlay').get(0)
+    const dims = faceapi.matchDimensions(canvas, videoEl, true)
+    dims.width = videoEl.clientWidth;
+    dims.height = videoEl.clientHeight;
+    canvas.width = videoEl.clientWidth;
+    canvas.height = videoEl.clientHeight;
+    const resizedResults = faceapi.resizeResults(results, dims)
+    //faceapi.draw.drawDetections(canvas, resizedResults)
+    const res = resizedResults.map(d=> {
+        if(faceMatcher=='undefined'){
+            console.log("3434");
+            return faceapi.resizeResults(results, dims);
+        }
+       return faceMatcher.findBestMatch(d.descriptor)
+    });
+    
+    res.forEach((ress,i) =>{
+      const box = resizedResults[i].detection.box;
+      const drawBox = new faceapi.draw.DrawBox(box,{label:ress.toString()})
+      drawBox.draw(canvas);
+    });
+    requestAnimationFrame(function(){
+        onPlay(videoEl)
+    })
+  }
+  function loadLabeledImages(){
+    const descriptions = [];
+    let labels = <%-JSON.stringify(filename)%>
+    return Promise.all(
+        labels.map(async label =>{
+            const img =  await faceapi.fetchImage(`./uploads/${label}/1.jpg`);
+            const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+            descriptions.push(detections.descriptor)
+            return new faceapi.LabeledFaceDescriptors(label,descriptions)
+        })
+    )
+    
+  }
+
+</script>
+
 <div class="container ">
     <h1>Face Detection</h1>
     <div class="row">
         <div class="col-md-8">
-            <video id="vid" autoplay muted loop style="width: 100%;height: auto;">
+            <video id="vid" autoplay muted style="width: 100%;height: auto;">
                 <source src="/images/bbt.mp4" type="video/mp4">
             </video>
             <canvas id="overlay" style="position: absolute;top: 0; left: 0;"></canvas>

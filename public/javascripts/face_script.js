@@ -13,7 +13,7 @@ Promise.all([
 
   async function onPlay(videoEl) {
     let results = await faceapi.detectAllFaces(videoEl).withFaceLandmarks();
-    console.log(results);
+    // console.log(results);
 
     const canvas = $('#overlay').get(0)
     const dims = faceapi.matchDimensions(canvas, videoEl, true)
@@ -22,9 +22,18 @@ Promise.all([
     canvas.width = videoEl.clientWidth;
     canvas.height = videoEl.clientHeight;
     const resizedResults = faceapi.resizeResults(results, dims)
-    faceapi.draw.drawDetections(canvas, resizedResults)
-
+    //faceapi.draw.drawDetections(canvas, resizedResults)
+    resizedResults.forEach(detection =>{
+      const box = detection.detection.box;
+      const drawBox = new faceapi.draw.DrawBox(box,{label:'Not Rcognized'})
+      drawBox.draw(canvas);
+    });
     requestAnimationFrame(function(){
         onPlay(videoEl)
     })
   }
+
+  // function loadLabeledImages() {
+  //   const labels = [];
+  //   // var files = fs.readdirSync('/public/images/uploads/')
+  // }

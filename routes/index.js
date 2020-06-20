@@ -30,7 +30,7 @@ var upload = multer({
 
 /* GET home page. */
 router.get('/',function(req, res, next) {
-  res.render('index', { title: 'Node App Express' });
+  res.render('index', { title: 'Node App Express'});
 });
 
 /* Get register-face page*/
@@ -43,7 +43,9 @@ router.get('/video-detection',ensureAuthenticated,(req,res)=>{
   res.render('video-detection');
 });
 router.get('/face-detection',ensureAuthenticated,(req,res)=>{
-  res.render('face-detection');
+  filename = fs.readdirSync('./public/uploads');
+  console.log("test",typeof(filename));
+  res.render('face-detection',{dirs:filename});
 });
 // register face
 router.post('/register2',upload.single('image'),(req,res)=>{
