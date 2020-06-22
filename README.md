@@ -1,5 +1,5 @@
 # mini_project_2020
-### to install depedecies
+### to install dependencies
 ```
 cd myapp
 npm install
